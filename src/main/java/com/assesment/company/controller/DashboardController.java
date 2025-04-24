@@ -1,6 +1,8 @@
 package com.assesment.company.controller;
 
 import com.assesment.company.entity.User;
+import com.assesment.company.entity.Exam;
+import com.assesment.company.entity.Result;
 import com.assesment.company.service.ExamService;
 import com.assesment.company.service.ResultService;
 import com.assesment.company.service.UserService;
@@ -19,9 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.ArrayList;
-import com.assesment.company.entity.Exam;
-import com.assesment.company.entity.Result;
-// import java.util.StringBuilder;
 
 @Controller
 public class DashboardController {
@@ -136,94 +135,61 @@ public class DashboardController {
             // Add user data
             model.addAttribute("user", user);
             
-            // Initialize dashboard data
-            Map<String, Object> dashboardData = new HashMap<>();
-            boolean hasError = false;
-            StringBuilder errorMessage = new StringBuilder();
+            // Initialize all required model attributes with default values
+            model.addAttribute("totalExams", 0L);
+            model.addAttribute("activeExams", 0L);
+            model.addAttribute("totalCandidates", 0L);
+            model.addAttribute("completedExams", 0L);
+            model.addAttribute("activeExamsList", new ArrayList<>());
+            model.addAttribute("recentResults", new ArrayList<>());
             
+            // Try to load each piece of data independently
             try {
                 long totalExams = examService.getTotalExamsCount(user);
-                dashboardData.put("totalExams", totalExams);
+                model.addAttribute("totalExams", totalExams);
                 logger.info("Total exams loaded: {}", totalExams);
             } catch (Exception e) {
                 logger.error("Error loading total exams: {}", e.getMessage(), e);
-                dashboardData.put("totalExams", 0);
-                hasError = true;
-                errorMessage.append("Error loading total exams. ");
             }
 
             try {
                 long activeExams = examService.getActiveExamsCount(user);
-                dashboardData.put("activeExams", activeExams);
+                model.addAttribute("activeExams", activeExams);
                 logger.info("Active exams loaded: {}", activeExams);
             } catch (Exception e) {
                 logger.error("Error loading active exams: {}", e.getMessage(), e);
-                dashboardData.put("activeExams", 0);
-                hasError = true;
-                errorMessage.append("Error loading active exams. ");
             }
 
             try {
                 long totalCandidates = resultService.getTotalCandidatesCount(user);
-                dashboardData.put("totalCandidates", totalCandidates);
+                model.addAttribute("totalCandidates", totalCandidates);
                 logger.info("Total candidates loaded: {}", totalCandidates);
             } catch (Exception e) {
                 logger.error("Error loading total candidates: {}", e.getMessage(), e);
-                dashboardData.put("totalCandidates", 0);
-                hasError = true;
-                errorMessage.append("Error loading total candidates. ");
             }
 
             try {
                 long completedExams = resultService.getCompletedExamsCount(user);
-                dashboardData.put("completedExams", completedExams);
+                model.addAttribute("completedExams", completedExams);
                 logger.info("Completed exams loaded: {}", completedExams);
             } catch (Exception e) {
                 logger.error("Error loading completed exams: {}", e.getMessage(), e);
-                dashboardData.put("completedExams", 0);
-                hasError = true;
-                errorMessage.append("Error loading completed exams. ");
             }
-
-            // Add all dashboard data to model
-            model.addAllAttributes(dashboardData);
 
             try {
                 List<Exam> activeExamsList = examService.getActiveExams(user);
-                if (activeExamsList != null) {
-                    // Ensure the list is mutable
-                    activeExamsList = new ArrayList<>(activeExamsList);
-                    // Sort by start time descending
-                    activeExamsList.sort((a, b) -> b.getStartTime().compareTo(a.getStartTime()));
-                }
                 model.addAttribute("activeExamsList", activeExamsList != null ? activeExamsList : new ArrayList<>());
                 logger.info("Active exams list loaded, size: {}", activeExamsList != null ? activeExamsList.size() : 0);
             } catch (Exception e) {
                 logger.error("Error loading active exams list: {}", e.getMessage(), e);
-                model.addAttribute("activeExamsList", new ArrayList<>());
-                hasError = true;
-                errorMessage.append("Error loading active exams list. ");
             }
 
             try {
                 List<Result> recentResults = resultService.getRecentResults(user);
-                if (recentResults != null) {
-                    // Ensure the list is mutable
-                    recentResults = new ArrayList<>(recentResults);
-                    // Sort by submission time descending
-                    recentResults.sort((a, b) -> b.getSubmissionTime().compareTo(a.getSubmissionTime()));
-                }
-                model.addAttribute("recentResults", recentResults != null ? recentResults : new ArrayList<>());
+                model.addAttribute("recentResults", recentResults != null ? recentResults : new ArrayList<Result>());
                 logger.info("Recent results loaded, size: {}", recentResults != null ? recentResults.size() : 0);
             } catch (Exception e) {
                 logger.error("Error loading recent results: {}", e.getMessage(), e);
-                model.addAttribute("recentResults", new ArrayList<>());
-                hasError = true;
-                errorMessage.append("Error loading recent results. ");
-            }
-
-            if (hasError) {
-                model.addAttribute("error", errorMessage.toString());
             }
 
             logger.info("Company dashboard data loaded successfully");
