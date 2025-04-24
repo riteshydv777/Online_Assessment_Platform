@@ -30,12 +30,11 @@ public class QuestionService {
             throw new RuntimeException("Unauthorized to update this question");
         }
 
-        existingQuestion.setQuestionText(updatedQuestion.getQuestionText());
-        existingQuestion.setOption1(updatedQuestion.getOption1());
-        existingQuestion.setOption2(updatedQuestion.getOption2());
-        existingQuestion.setOption3(updatedQuestion.getOption3());
-        existingQuestion.setOption4(updatedQuestion.getOption4());
-        existingQuestion.setCorrectOption(updatedQuestion.getCorrectOption());
+        existingQuestion.setText(updatedQuestion.getText());
+        existingQuestion.setType(updatedQuestion.getType());
+        existingQuestion.setPoints(updatedQuestion.getPoints());
+        existingQuestion.getOptions().clear();
+        existingQuestion.getOptions().addAll(updatedQuestion.getOptions());
 
         return questionRepository.save(existingQuestion);
     }

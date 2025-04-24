@@ -3,6 +3,7 @@ package com.assesment.company.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,13 +33,13 @@ public class Exam {
     @JoinColumn(name = "company_id", nullable = false)
     private User company;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "exam_questions",
         joinColumns = @JoinColumn(name = "exam_id"),
         inverseJoinColumns = @JoinColumn(name = "question_id")
     )
-    private List<Question> questions;
+    private List<Question> questions = new ArrayList<>();
 
     @Column(nullable = false)
     private boolean isActive = true;

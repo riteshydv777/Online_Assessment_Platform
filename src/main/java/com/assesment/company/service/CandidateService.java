@@ -26,7 +26,10 @@ public class CandidateService {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (user.getRole() == User.UserRole.CANDIDATE && passwordEncoder.matches(rawPassword, user.getPassword())) {
+            if (user.getRole() != User.UserRole.CANDIDATE) {
+                throw new IllegalArgumentException("Invalid role for candidate login");
+            }
+            if (passwordEncoder.matches(rawPassword, user.getPassword())) {
                 return Optional.of(user);
             }
         }

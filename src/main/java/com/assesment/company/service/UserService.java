@@ -11,12 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -25,8 +21,8 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
@@ -34,8 +30,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    @Autowired
-    private ApplicationContext applicationContext;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -57,7 +52,9 @@ public class UserService implements UserDetailsService {
         }
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString()));
+        String role = user.getRole().toString();
+        logger.info("Loading user: {}, Role: {}", email, role);
+        authorities.add(new SimpleGrantedAuthority(role));
 
         return new org.springframework.security.core.userdetails.User(
             user.getEmail(),
@@ -81,29 +78,26 @@ public class UserService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || 
             authentication instanceof AnonymousAuthenticationToken) {
-            throw new AuthenticationCredentialsNotFoundException("No authenticated user found");
+            throw new RuntimeException("No authenticated user found");
         }
 
         return userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public static class UserAlreadyExistsException extends RuntimeException {
-        public UserAlreadyExistsException(String message) {
-            super(message);
-        }
-    }
-
     @Transactional
     public User registerUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException("Email already exists");
+            throw new RuntimeException("Email already exists");
+        }
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username already exists");
         }
 
-        user.setUsername(user.getEmail());
+        // Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
-        user.setRole(user.getRole() != null ? user.getRole() : User.UserRole.COMPANY);
+        // Set default account status
         user.setEnabled(true);
         user.setAccountNonLocked(true);
         user.setAccountNonExpired(true);
@@ -120,6 +114,19 @@ public class UserService implements UserDetailsService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validateCredentials(String email, String password) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return passwordEncoder.matches(password, user.getPassword());
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
     @Transactional
@@ -159,28 +166,6 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return passwordEncoder.matches(password, user.getPassword());
-    }
-
-    private AuthenticationManager getAuthenticationManager() {
-        return applicationContext.getBean(AuthenticationManager.class);
-    }
-
-    public void authenticate(String email, String password) {
-        try {
-            AuthenticationManager authenticationManager = getAuthenticationManager();
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid email or password");
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
     @Transactional

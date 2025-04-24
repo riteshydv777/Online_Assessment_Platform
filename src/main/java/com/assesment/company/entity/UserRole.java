@@ -1,11 +1,16 @@
 package com.assesment.company.entity;
 
 public enum UserRole {
-    CANDIDATE,
-    COMPANY;
-
-    @Override
-    public String toString() {
-        return name();
+    CANDIDATE {
+        @Override
+        public String toString() {
+            return "ROLE_CANDIDATE";
+        }
+    },
+    COMPANY {
+        @Override
+        public String toString() {
+            return "ROLE_COMPANY";
+        }
     }
 } 

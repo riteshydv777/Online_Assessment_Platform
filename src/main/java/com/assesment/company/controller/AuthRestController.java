@@ -3,6 +3,7 @@ package com.assesment.company.controller;
 import com.assesment.company.entity.User;
 import com.assesment.company.security.JwtTokenUtil;
 import com.assesment.company.service.UserService;
+import com.assesment.company.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,31 +29,65 @@ public class AuthRestController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody Map<String, String> registrationRequest) {
         try {
-            logger.info("Attempting to register user with email: {}", user.getEmail());
+            // Extract required fields
+            String name = registrationRequest.get("name");
+            String email = registrationRequest.get("email");
+            String password = registrationRequest.get("password");
+            String roleStr = registrationRequest.get("role");
+
+            // Validate required fields
+            if (name == null || email == null || password == null || roleStr == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Registration failed",
+                    "message", "Name, email, password, and role are required"
+                ));
+            }
+
+            logger.info("Attempting to register user with email: {}", email);
             
-            // Set default values for new user
+            // Create new user
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setPassword(password);
+            user.setUsername(email); // Use email as username
+            
+            // Set role
+            try {
+                String normalizedRole = roleStr.toUpperCase().replace("ROLE_", "");
+                user.setRole(User.UserRole.valueOf(normalizedRole));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Registration failed",
+                    "message", "Invalid role. Must be either CANDIDATE or COMPANY"
+                ));
+            }
+            
+            // Set default values
             user.setEnabled(true);
             user.setAccountNonLocked(true);
             user.setAccountNonExpired(true);
             user.setCredentialsNonExpired(true);
             
-            // Set default role if not provided
-            if (user.getRole() == null) {
-                user.setRole(User.UserRole.COMPANY); // Default role
-            }
-            
             User registeredUser = userService.registerUser(user);
-            logger.info("Successfully registered user with email: {}", user.getEmail());
+            logger.info("Successfully registered user with email: {}", email);
             
             return ResponseEntity.ok(Map.of(
                 "message", "Registration successful",
-                "user", registeredUser
+                "user", Map.of(
+                    "name", registeredUser.getName(),
+                    "email", registeredUser.getEmail(),
+                    "role", registeredUser.getRole()
+                )
             ));
         } catch (Exception e) {
-            logger.error("Registration failed for email: {}. Error: {}", user.getEmail(), e.getMessage());
+            logger.error("Registration failed. Error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(Map.of(
                 "error", "Registration failed",
                 "message", e.getMessage()
@@ -88,7 +123,7 @@ public class AuthRestController {
                 }
 
                 // Attempt authentication
-                userService.authenticate(email, password);
+                authenticationService.authenticate(email, password);
                 logger.info("Authentication successful for email: {}", email);
 
                 // Generate token

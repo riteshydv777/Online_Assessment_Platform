@@ -21,11 +21,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Transient
+    private String confirmPassword;
+
     @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private UserRole role;
 
     @Column(nullable = false)
@@ -44,8 +46,18 @@ public class User {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum UserRole {
-        CANDIDATE,
-        COMPANY
+        CANDIDATE {
+            @Override
+            public String toString() {
+                return "ROLE_CANDIDATE";
+            }
+        },
+        COMPANY {
+            @Override
+            public String toString() {
+                return "ROLE_COMPANY";
+            }
+        }
     }
 
     // Getters and Setters
@@ -119,5 +131,21 @@ public class User {
 
     public void setAccountNonLocked(boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 } 

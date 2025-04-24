@@ -3,17 +3,13 @@
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} ?: 'Assessment Platform'">Assessment Platform</title>
+    <title>Assessment Platform</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="/css/style.css">
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -22,7 +18,7 @@
         }
 
         .navbar {
-            background-color: #007bff !important; /* Primary blue */
+            background-color: #007bff !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -66,7 +62,7 @@
         .main-content {
             padding-top: 2rem;
             padding-bottom: 4rem;
-            min-height: 60vh; /* Ensure some minimum height */
+            min-height: 60vh;
         }
 
         .footer {
@@ -113,79 +109,59 @@
         }
     </style>
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary" th:if="${#authentication.principal != null}">
-    <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-graduation-cap me-2"></i>
-            Assessment Platform
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">
-                        <i class="fas fa-tachometer-alt me-1"></i>
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/exams">
-                        <i class="fas fa-file-alt me-1"></i>
-                        Exams
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/results">
-                        <i class="fas fa-chart-bar me-1"></i>
-                        Results
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user me-1"></i>
-                        <span th:text="${#authentication.principal.username}">User</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-cog me-2"></i> Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form th:action="@{/logout}" method="post">
-                                <button type="submit" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-1"></i>
-                                    Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+
+<body th:fragment="body">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-graduation-cap me-2"></i>Assessment Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/exams"><i class="fas fa-file-alt me-1"></i>Exams</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/results"><i class="fas fa-chart-bar me-1"></i>Results</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span th:text="${#authentication.principal.username}">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-cog me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
+
+    <div th:replace="${content}">
+        <!-- Content will be inserted here -->
     </div>
-</nav>
 
-<main th:if="${#authentication.principal != null}" class="container py-4 main-content">
-    <th:block th:replace="${content} ?: ~{::main/content}">
-        <th:block th:fragment="content"></th:block>
-    </th:block>
-</main>
+    <footer class="footer mt-auto py-3 bg-light" th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Assessment Platform. All rights reserved.</span>
+        </div>
+    </footer>
 
-<div th:if="${#authentication.principal == null}" class="main-content">
-    <th:block th:replace="${content} ?: ~{::main/content}">
-        <th:block th:fragment="content"></th:block>
-    </th:block>
-</div>
-
-<footer th:if="${#authentication.principal != null}" class="footer mt-auto py-3 bg-light">
-    <div class="container text-center">
-        <span class="text-muted">© 2025 Assessment Platform. All rights reserved.</span>
-    </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

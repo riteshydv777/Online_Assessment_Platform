@@ -13,12 +13,11 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #74ebd5, #9face6);
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
         }
 
         .auth-card {
@@ -88,70 +87,85 @@
             margin: 0;
             padding-left: 20px;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="auth-card">
-        <div class="auth-header">
-            <i class="fas fa-user-plus"></i>
-            <h2>Create Account</h2>
-            <p>Join our assessment platform</p>
-        </div>
-
-        <form th:action="@{/register}" method="post" th:object="${user}">
-            <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
-                <ul>
-                    <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
-                </ul>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Create Account</h2>
+                <p>Join our assessment platform</p>
             </div>
 
-            <div class="form-group">
-                <label for="username"><i class="fas fa-user me-2"></i>Username</label>
-                <input type="text" id="username" th:field="*{username}" class="form-control" required>
+            <form th:action="@{/register}" method="post" th:object="${user}">
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                    <ul>
+                        <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                    </ul>
+                </div>
+                
+                <div th:if="${param.error}" class="alert alert-danger">
+                    <p th:text="${param.error}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user me-2"></i>Username</label>
+                    <input type="text" id="username" th:field="*{username}" class="form-control" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">
+                        Please provide a username.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-id-card me-2"></i>Full Name</label>
+                    <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                        Please provide a valid email.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                    <input type="password" id="password" th:field="*{password}" class="form-control" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+                        Please provide a password.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword"><i class="fas fa-lock me-2"></i>Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                    <div class="invalid-feedback">
+                        Passwords must match.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="role"><i class="fas fa-user-tag me-2"></i>Account Type</label>
+                    <select id="role" th:field="*{role}" class="form-control" required>
+                        <option value="">Select account type</option>
+                        <option value="ROLE_COMPANY">Company</option>
+                        <option value="ROLE_CANDIDATE">Candidate</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">
+                        Please select an account type.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
             </div>
-
-            <div class="form-group">
-                <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
-                <input type="email" id="email" th:field="*{email}" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
-                <input type="password" id="password" th:field="*{password}" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="confirmPassword"><i class="fas fa-lock me-2"></i>Confirm Password</label>
-                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="role"><i class="fas fa-user-tag me-2"></i>Account Type</label>
-                <select id="role" th:field="*{role}" class="form-control" required>
-                    <option value="">Select account type</option>
-                    <option value="COMPANY">Company</option>
-                    <option value="CANDIDATE">Candidate</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-user-plus me-2"></i>Register
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
         </div>
     </div>
 

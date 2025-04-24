@@ -1,193 +1,506 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/base :: head">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Dashboard - Assessment Platform</title>
-    <!-- Bootstrap 5 CSS -->
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Custom Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to right, #74ebd5, #ACB6E5);
-            min-height: 100vh;
-            padding-bottom: 60px;
-        }
+       font-family: 'Poppins', sans-serif;
+       background-color: #eef1f6;
+       margin: 0;
+       padding: 0;
+   }
 
-        h2, h4, h5 {
-            font-weight: 600;
-        }
+   .navbar {
+       background: linear-gradient(90deg, #0d6efd, #6610f2);
+       padding: 1rem 0;
+       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+   }
 
-        .stats-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
+   .navbar-brand {
+       color: white;
+       font-weight: 600;
+       font-size: 1.6rem;
+       text-decoration: none;
+   }
 
-        .stats-card:hover {
-            transform: scale(1.03);
-        }
+   .nav-link {
+       color: rgba(255, 255, 255, 0.85);
+       font-weight: 500;
+       margin-left: 1rem;
+       transition: color 0.3s ease-in-out;
+   }
 
-        .stats-card .number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #007bff;
-        }
+   .nav-link:hover {
+       color: #fff;
+   }
 
-        .stats-card .label {
-            font-size: 16px;
-            color: #555;
-        }
+   .dropdown-menu {
+       border: none;
+       border-radius: 8px;
+       padding: 0.5rem;
+       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+   }
 
-        .exam-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: box-shadow 0.3s;
-        }
+   .dropdown-item {
+       padding: 0.5rem 1.2rem;
+       border-radius: 6px;
+       transition: background 0.2s ease;
+   }
 
-        .exam-card:hover {
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-        }
+   .dropdown-item:hover {
+       background-color: #f1f1f1;
+   }
 
-        .btn-outline-primary:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
+   .logout-btn {
+       background: none;
+       border: 2px solid #dc3545;
+       color: #dc3545;
+       padding: 0.4rem 1rem;
+       font-weight: 500;
+       border-radius: 6px;
+       transition: all 0.3s;
+   }
 
-        .table thead th {
-            background-color: #f0f4fa;
-            font-weight: 600;
-        }
+   .logout-btn:hover {
+       background-color: #dc3545;
+       color: white;
+   }
 
-        .badge {
-            font-size: 0.9rem;
-            padding: 5px 10px;
-        }
+   .main-content {
+       padding: 2rem 1rem;
+   }
 
-        .card-header h4 {
-            font-weight: 600;
-        }
+   .dashboard-container {
+       max-width: 1140px;
+       margin: 0 auto;
+   }
 
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-        }
+   .stats-card {
+       background: white;
+       border-radius: 15px;
+       padding: 1.5rem;
+       margin-bottom: 1.5rem;
+       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+       transition: transform 0.2s ease;
+   }
+
+   .stats-card:hover {
+       transform: translateY(-5px);
+   }
+
+   .stats-number {
+       font-size: 2.2rem;
+       font-weight: 700;
+       color: #0d6efd;
+   }
+
+   .stats-label {
+       color: #6c757d;
+       font-size: 0.9rem;
+   }
+
+   .card-header {
+       background-color: #fff;
+       border-bottom: none;
+       font-weight: 600;
+   }
+
+   .card {
+       border-radius: 12px;
+       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+       border: none;
+   }
+
+   .btn-outline-primary {
+       border-radius: 8px;
+       font-weight: 500;
+   }
+
+   .btn-primary.btn-sm {
+       border-radius: 6px;
+       padding: 0.3rem 0.75rem;
+       font-size: 0.85rem;
+   }
+
+   .badge {
+       padding: 0.4em 0.7em;
+       font-size: 0.8em;
+       border-radius: 5px;
+   }
+
+   .table-hover tbody tr:hover {
+       background-color: #f5f9ff;
+   }
+
+   @media (max-width: 768px) {
+       .navbar-nav {
+           flex-direction: column;
+           align-items: flex-start;
+       }
+
+       .nav-link {
+           margin-left: 0;
+           margin-bottom: 0.5rem;
+       }
+
+       .stats-card {
+           margin-bottom: 1rem;
+       }
+   }
     </style>
 </head>
 <body>
-<div th:replace="layout/base :: nav"></div>
-
-<div class="container mt-5">
-    <h2 class="mb-4">Welcome, <span th:text="${user.name}">Candidate</span>!</h2>
-
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <div class="number">
-                    <i class="fas fa-check-circle me-2 text-success"></i>
-                    <span th:text="${completedExams}">0</span>
-                </div>
-                <div class="label">Completed Exams</div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <div class="number">
-                    <i class="fas fa-chart-line me-2 text-info"></i>
-                    <span th:text="${averageScore}">0%</span>
-                </div>
-                <div class="label">Average Score</div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="stats-card">
-                <div class="number">
-                    <i class="fas fa-clock me-2 text-warning"></i>
-                    <span th:text="${upcomingExams}">0</span>
-                </div>
-                <div class="label">Upcoming Exams</div>
-            </div>
-        </div>
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="navbar-brand">Assessment Platform</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="/exams" class="nav-link">Exams</a>
+            </li>
+            <li class="nav-item">
+                <a href="/results" class="nav-link">Results</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link" th:text="${user.email}">user@email.com</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/profile" class="dropdown-item">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="padding: 0 1.5rem;">
+                            <button type="submit" class="logout-btn">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
+</nav>
 
-    <!-- Upcoming Exams -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-            <h4 class="mb-0">Upcoming Exams</h4>
-            <a th:href="@{/exams/available}" class="btn btn-primary btn-sm">
-                <i class="fas fa-arrow-right"></i> View All
-            </a>
-        </div>
-        <div class="card-body">
-            <div th:if="${#lists.isEmpty(upcomingExamsList)}" class="text-center py-3">
-                <p class="mb-0">No upcoming exams scheduled.</p>
+<!-- Main Content -->
+<div class="main-content">
+    <div class="dashboard-container">
+        <h2 class="mb-4">Welcome, <span th:text="${user.name}">Candidate</span>!</h2>
+
+        <!-- Stats Row -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number" th:text="${completedExams}">0</div>
+                    <div class="stats-label">Completed Exams</div>
+                </div>
             </div>
-            <div th:each="exam : ${upcomingExamsList}" class="exam-card mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 th:text="${exam.title}">Exam Title</h5>
-                        <p class="mb-1" th:text="${exam.description}">Exam Description</p>
-                        <small class="text-muted">
-                            Duration: <span th:text="${exam.durationMinutes}">60</span> minutes
-                        </small>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">
+                        <span th:text="${#numbers.formatDecimal(averageScore, 1, 1)}">0.0</span>%
                     </div>
-                    <a th:href="@{/exams/{id}(id=${exam.id})}" class="btn btn-outline-primary">View Details</a>
+                    <div class="stats-label">Average Score</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number" th:text="${upcomingExams}">0</div>
+                    <div class="stats-label">Upcoming Exams</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Recent Results -->
-    <div class="card">
-        <div class="card-header bg-light">
-            <h4 class="mb-0">Recent Results</h4>
-        </div>
-        <div class="card-body">
-            <div th:if="${#lists.isEmpty(recentResults)}" class="text-center py-3">
-                <p class="mb-0">No exam results yet.</p>
+        <!-- Upcoming Exams -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Upcoming Exams</h4>
+                <a href="/exams" class="btn btn-primary btn-sm">View All</a>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover" th:unless="${#lists.isEmpty(recentResults)}">
-                    <thead>
-                    <tr>
-                        <th>Exam</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="result : ${recentResults}">
-                        <td th:text="${result.exam.title}">Exam Title</td>
-                        <td th:text="${result.score + '%'}">85%</td>
-                        <td th:text="${#temporals.format(result.completedAt, 'dd MMM yyyy')}">01 Jan 2024</td>
-                        <td>
-                            <span class="badge bg-success" th:if="${result.score >= 60}">Passed</span>
-                            <span class="badge bg-danger" th:unless="${result.score >= 60}">Failed</span>
-                        </td>
-                        <td>
-                            <a th:href="@{/results/{id}(id=${result.id})}" class="btn btn-sm btn-outline-primary">View</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(upcomingExamsList)}" class="text-center py-3">
+                    <p class="mb-0">No upcoming exams scheduled.</p>
+                </div>
+                <div th:each="exam : ${upcomingExamsList}" class="mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 th:text="${exam.title}">Exam Title</h5>
+                            <p class="mb-1" th:text="${exam.description}">Exam Description</p>
+                            <small class="text-muted">
+                                Duration: <span th:text="${exam.durationMinutes}">60</span> minutes
+                            </small>
+                        </div>
+                        <a th:href="@{/exams/{id}(id=${exam.id})}" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Results -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Recent Results</h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(recentResults)}" class="text-center py-3">
+                    <p class="mb-0">No exam results yet.</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" th:unless="${#lists.isEmpty(recentResults)}">
+                        <thead>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="result : ${recentResults}">
+                            <td th:text="${result.exam.title}">Exam Title</td>
+                            <td th:text="${result.score + '%'}">85%</td>
+                            <td th:text="${#temporals.format(result.submissionTime, 'dd MMM yyyy')}">01 Jan 2024</td>
+                            <td>
+                                <span class="badge bg-success" th:if="${result.score >= 60}">Passed</span>
+                                <span class="badge bg-danger" th:unless="${result.score >= 60}">Failed</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/results/{id}(id=${result.id})}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<style th:fragment="page_styles">
+    .dashboard-container {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 60px);
+    }
 
-<div th:replace="layout/base :: footer"></div>
-<div th:replace="layout/base :: scripts"></div>
+    .welcome-banner {
+        background: linear-gradient(135deg, #0061f2 0%, #00ba94 100%);
+        color: white;
+        padding: 2.5rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .welcome-title {
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .text-highlight {
+        color: #ffd700;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .action-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stats-card.completed .stats-icon {
+        background: rgba(0, 186, 148, 0.1);
+        color: #00ba94;
+    }
+
+    .stats-card.score .stats-icon {
+        background: rgba(0, 97, 242, 0.1);
+        color: #0061f2;
+    }
+
+    .stats-card.upcoming .stats-icon {
+        background: rgba(255, 153, 0, 0.1);
+        color: #ff9900;
+    }
+
+    .stats-info {
+        flex: 1;
+    }
+
+    .stats-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+        line-height: 1;
+    }
+
+    .stats-label {
+        color: #69707a;
+        margin-bottom: 0;
+        font-size: 0.875rem;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
+        margin-bottom: 2rem;
+    }
+
+    .card-header {
+        background: transparent;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        color: #363d47;
+    }
+
+    .exam-item, .result-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .exam-item:hover, .result-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .exam-info h5 {
+        margin-bottom: 0.5rem;
+        color: #363d47;
+    }
+
+    .exam-meta {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+    }
+
+    .result-score .score-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .score-circle.pass {
+        background: rgba(0, 186, 148, 0.1);
+        color: #00ba94;
+    }
+
+    .score-circle.fail {
+        background: rgba(255, 68, 68, 0.1);
+        color: #ff4444;
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #69707a;
+    }
+
+    .empty-icon {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .welcome-banner {
+            padding: 2rem 0;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+        }
+
+        .stats-card {
+            padding: 1rem;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Enable dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        var dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('click', function() {
+                this.querySelector('.dropdown-menu').classList.toggle('show');
+            });
+        });
+    });
+</script>
 </body>
 </html>

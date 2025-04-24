@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: body">
+<head th:replace="layout/base :: head">
+    <title th:text="${exam.id == null ? 'Create Exam' : 'Edit Exam'} + ' - Assessment Platform'">Create Exam - Assessment Platform</title>
+    <style>
+        .question-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .question-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .question-item:hover {
+            background-color: #f8f9fa;
+        }
+        .question-item.selected {
+            background-color: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0" th:text="${exam.id == null ? 'Create New Exam' : 'Edit Exam'}">Create New Exam</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="examForm" th:action="@{${exam.id == null ? '/api/exams' : '/api/exams/' + exam.id}}" method="post">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Exam Title</label>
+                                    <input type="text" class="form-control" id="title" name="title" th:value="${exam.title}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" th:text="${exam.description}" required></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="durationMinutes" class="form-label">Duration (minutes)</label>
+                                        <input type="number" class="form-control" id="durationMinutes" name="durationMinutes" th:value="${exam.durationMinutes}" required min="1">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="startTime" class="form-label">Start Time</label>
+                                        <input type="datetime-local" class="form-control" id="startTime" name="startTime" th:value="${#temporals.format(exam.startTime, 'yyyy-MM-dd''T''HH:mm')}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="endTime" class="form-label">End Time</label>
+                                    <input type="datetime-local" class="form-control" id="endTime" name="endTime" th:value="${#temporals.format(exam.endTime, 'yyyy-MM-dd''T''HH:mm')}" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Exam</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0">Questions</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="question-list">
+                                <div th:each="question : ${questions}" 
+                                     class="question-item p-2 mb-2 border rounded"
+                                     th:classappend="${exam.questions != null and exam.questions.contains(question)} ? 'selected'"
+                                     th:onclick="'toggleQuestion(this, ' + ${question.id} + ')'">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span th:text="${question.text}">Question text</span>
+                                        <i class="fas fa-check text-primary" th:if="${exam.questions != null and exam.questions.contains(question)}"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let selectedQuestions = new Set(/*[[${exam.questions != null ? exam.questions.![id] : []}]]*/ []);
+
+        function toggleQuestion(element, questionId) {
+            element.classList.toggle('selected');
+            if (element.classList.contains('selected')) {
+                selectedQuestions.add(questionId);
+            } else {
+                selectedQuestions.delete(questionId);
+            }
+        }
+
+        document.getElementById('examForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const examData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                durationMinutes: parseInt(formData.get('durationMinutes')),
+                startTime: formData.get('startTime'),
+                endTime: formData.get('endTime')
+            };
+
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(examData)
+            })
+            .then(response => response.json())
+            .then(exam => {
+                if (selectedQuestions.size > 0) {
+                    return fetch(`/api/exams/${exam.id}/questions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(Array.from(selectedQuestions))
+                    });
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                window.location.href = '/dashboard';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save exam');
+            });
+        });
+    </script>
+</body>
+</html> 
